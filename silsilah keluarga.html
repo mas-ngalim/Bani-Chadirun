@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silsilah Keluarga</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        /* --- DASAR & RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+          background: #f8f9fa;
+          line-height: 1.6;
+          color: #333; 
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        /* --- NAVIGASI --- */
+        nav {
+            background: #36454F;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            position: sticky;
+            top: 0;
+            z-index: 1100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .logo-img { height: 50px; width: 75px; }
+
+        .menu-toggle { 
+            display: flex; 
+            flex-direction: column; 
+            cursor: pointer; 
+            gap: 5px; 
+            z-index: 1200;
+        }
+        
+        .menu-toggle span { height: 3px; width: 25px; background: white; border-radius: 2px; transition: 0.3s; }
+
+        .menu-toggle.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+        .menu-toggle.open span:nth-child(2) { opacity: 0; }
+        .menu-toggle.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+        .menu {
+            display: flex; 
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #566D7E;
+            text-align: center;
+            list-style: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease-in-out;
+            opacity: 0;
+            z-index: 1050;
+        }
+
+        .menu.active { max-height: 500px; opacity: 1; padding: 20px 0; }
+        .menu li { margin: 15px 0; }
+        .menu a { color: white; text-decoration: none; font-size: 1.1rem; transition: 0.3s; }
+        .menu a:hover { color: #E1AD01; }
+
+        /* --- OVERLAY BLUR --- */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.4s;
+        }
+        .overlay.active { opacity: 1; visibility: visible; }
+
+        /* --- KONTEN UTAMA --- */
+        .container { padding: 60px 5%; max-width: 1200px; margin: 0 auto; flex: 1; }
+        .header-text { text-align: center; margin-bottom: 40px; }
+        .header-text h1 { font-size: 40px; margin-bottom: 10px; color: #36454F; }
+
+        /* --- KARTU GRID --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            border: 1px solid #eee;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .card:hover { transform: translateY(-10px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .card-img { width: 100%; height: 200px; background: #ddd; object-fit: cover; }
+        .card-body { padding: 20px; }
+        .card-body h2 { font-size: 1.4rem; color: #36454F; margin-bottom: 8px; }
+        .card-body p { font-size: 0.95rem; color: #666; }
+
+        /* --- MODAL POP-UP --- */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000; opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+        .modal.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: white; width: 90%; max-width: 450px; padding: 40px 20px;
+            border-radius: 20px; position: relative; transform: scale(0.8); transition: 0.3s;
+            text-align: center;
+        }
+        .modal.active .modal-content { transform: scale(1); }
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 28px; cursor: pointer; color: #999; }
+        .modal-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid #E1AD01; }
+
+        /* --- ANIMASI --- */
+        @keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.animasi-teks {
+    animation: slideInLeft 1.5s ease-in-out forwards;
+}
+
+
+        /* --- FOOTER --- */
+        footer {
+            background: #36454F;
+            color: white;
+            padding: 50px 5% 20px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .social-links { display: flex; gap: 15px; margin-top: 15px; }
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            color: white;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .social-links a:hover { background: #E1AD01; transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <a href="logo.png"><img src="logo.png" alt="Logo" class="logo-img"></a>
+        </div>
+        <div class="menu-toggle" id="mobile-menu">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="menu" id="nav-list">
+            <li><a href="http://localhost:8158/index.html">Beranda</a></li>
+            <li><a href="http://localhost:8158/silsilah keluarga.html">Silsilah Keluarga</a></li>
+            <li><a href="http://localhost:8158/berita.html">Berita</a></li>
+        </ul>
+    </nav>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="container">
+        <div class="header-text">
+            <h1 class="animasi-teks">
+              Silsilah Keluarga
+            </h1>
+            <p class="animasi-teks">
+              Klik kartu untuk melihat informasi detail anggota keluarga.
+            </p>
+        </div>
+
+            <div class="card" onclick="openModal('Kepala Keluarga', 'H. Muhammad Ali Chadirun putra dari Bpk. Mad Sanrodji dan Ibu Tarwiyah. Dan Hj. Wasilah putri dari Bpk. Mad Soleh dan Ibu Muflihah.', 'https://via.placeholder.com/150')">
+                <img src="https://via.placeholder.com/400x250" class="card-img">
+                <div class="card-body">
+                    <h2>Kepala Keluarga</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Samsul Bahri', 'Beristrikan Widhi Astuti dan dikaruniai 3 anak: Bintan, Kayis & Renal.', 'De Samsul.jpg')">
+                <img src="De Samsul.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak pertama</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Umi Mamuroh', 'Bersuamikakan Widianto dan dikaruniai 4 anak: Kholis, Ngelim, Papad & Riri.', 'Ibu.jpg')">
+                <img src="Ibu.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak kedua</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Shohib Aulawi', 'Beristrikan Ami dan dikaruniai 5 anak: Vina, Dodon, Luqi, Bedillah & Mazna.', 'Lik Sohib.jpg')">
+                <img src="Lik Sohib.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak ketiga</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Nikmatus Sururiyah', 'Bersuamikankan Faozan.', 'Lik Kuyah.jpg')">
+                <img src="Lik Kuyah.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak keempat</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Nur Azizah Subarkah', 'Bersuamikankan Mokh Fadil Ruyat Habib dan dikaruniai 2 anak: Napis & Hana.', 'Lik Nung.jpg')">
+                <img src="Lik Nung.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak kelima</h2>
+                </div>
+            </div>
+
+            <div class="card" onclick="openModal('Lutfi Zaini Hakim', 'Beristrikan Atik Agustin dan dikaruniai 2 anak: Kaif & Abisam.', 'Lik Upi.jpg')">
+                <img src="Lik Upi.jpg" class="card-img">
+                <div class="card-body">
+                    <h2>Anak keenam</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <img src="" id="modalImg" class="modal-img">
+            <div class="modal-body">
+                <h2 id="modalTitle">Nama</h2>
+                <p id="modalDesc">Deskripsi</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Follow us</h3>
+                <div class="social-links">
+                    <a href="https://wa.me/qr/OWMGHO2575KUC1" class="wa" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="https://www.instagram.com/momen.in_?igsh=MTJvY2ozbHg4c241ZQ==" class="ig" title="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // LOGIKA MENU HAMBURGER
+        const menuToggle = document.getElementById('mobile-menu');
+        const navList = document.getElementById('nav-list');
+        const overlay = document.getElementById('overlay');
+
+        function toggleMenu() {
+            navList.classList.toggle('active');
+            menuToggle.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = navList.classList.contains('active') ? 'hidden' : 'auto';
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // LOGIKA MODAL
+        const modal = document.getElementById('infoModal');
+        const closeModal = document.getElementById('closeModal');
+
+        function openModal(nama, deskripsi, foto) {
+            document.getElementById('modalTitle').innerText = nama;
+            document.getElementById('modalDesc').innerText = deskripsi;
+            document.getElementById('modalImg').src = foto;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        closeModal.onclick = () => {
+            modal.classList.remove('active');
+            if (!navList.classList.contains('active')) document.body.style.overflow = 'auto';
+        };
+
+        window.onclick = (e) => {
+            if (e.target == modal) {
+                modal.classList.remove('active');
+                if (!navList.classList.contains('active')) document.body.style.overflow = 'auto';
+            }
+        };
+    </script>
+</body>
+</html>
