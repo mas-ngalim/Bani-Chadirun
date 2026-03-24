@@ -145,19 +145,19 @@
         .modal-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 20px; border: 4px solid #E1AD01; }
 
         /* --- ANIMASI --- */
-        @keyframes slideInLeft {
+        @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateX(-100px);
+        transform: translateY(30px);
     }
     to {
         opacity: 1;
-        transform: translateX(0);
+        transform: translateY(0);
     }
 }
 
 .animasi-teks {
-    animation: slideInLeft 1.5s ease-in-out forwards;
+    animation: fadeInUp 1.5s ease-out forwards;
 }
 
 
